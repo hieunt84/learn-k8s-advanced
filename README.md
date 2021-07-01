@@ -1,4 +1,4 @@
-# learn-k8s-advanced
+# Play-k8s
 ### Goal
     - ứng dụng k8s vào thực tế (Usecase)
 
