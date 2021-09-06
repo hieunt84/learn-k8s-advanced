@@ -18,11 +18,6 @@
 ```console
    kubectl apply -f test-claim.yaml
 ```
-5. Deploy mysql using persisten volume
-```console
-   cofig persistent in mysql.values
-   helm install -f mysql.values hit-mysql bitnami/mysql
-```
 
 ### Ref
     Viettel VKE
