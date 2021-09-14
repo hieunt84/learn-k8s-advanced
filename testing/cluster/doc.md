@@ -13,4 +13,4 @@
     - kubectl 
 
 ### Architecture
-    - 3 node :  1 master, 2 worker.
+    - 4 node :  1 master, 2 worker , 1 nfs server
