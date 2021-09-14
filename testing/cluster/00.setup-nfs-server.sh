@@ -3,12 +3,14 @@
 ##########################################################################################
 # SECTION 1: PREPARE
 
-# update system
+# change root
 sudo -i
 sleep 1
-yum clean all
-yum -y update
-sleep 1
+
+# update system
+# yum clean all
+# yum -y update
+# sleep 1
 
 # config timezone
 timedatectl set-timezone Asia/Ho_Chi_Minh
@@ -18,20 +20,8 @@ setenforce 0
 sed -i 's/enforcing/disabled/g' /etc/selinux/config
 
 # disable firewall
-# systemctl stop firewalld
-# systemctl disable firewalld
-
-# config hostname
-# hostnamectl set-hostname node1
-
-# config file host
-#cat >> "/etc/hosts" <<END
-#172.16.10.100 node1
-#172.16.10.101 node2
-#172.16.10.102 node3 
-#END
-
-# config network, config in vagrantfile in dev
+systemctl stop firewalld
+systemctl disable firewalld
 
 ##########################################################################################
 # SECTION 2: INSTALL NFS
@@ -82,11 +72,13 @@ exportfs -rav
 systemctl restart nfs-server
 sleep 2
 
-# Mở cổng cho NFS qua firewall
-firewall-cmd --permanent --zone=public --add-service=nfs
-firewall-cmd --permanent --zone=public --add-service=mountd
-firewall-cmd --permanent --zone=public --add-service=rpc-bind
-firewall-cmd --reload
+# Mở cổng cho NFS server
+# firewall-cmd --permanent --zone=public --add-service=nfs
+# firewall-cmd --permanent --zone=public --add-service=mountd
+# firewall-cmd --permanent --zone=public --add-service=rpc-bind
+# firewall-cmd --reload
+# systemctl restart firewalld
+# systemctl enable firewalld
 
 #########################################################################################
 # SECTION 4: FINISH

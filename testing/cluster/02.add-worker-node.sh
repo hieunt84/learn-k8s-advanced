@@ -3,12 +3,17 @@
 ##########################################################################################
 # SECTION 1: PREPARE
 
-# update system
+# change root
 sudo -i
-sleep 2
-yum clean all
-yum -y update
 sleep 1
+
+# TODO Make [pod network CIDR, K8s version, docker version, etc.] configurable
+K8S_VERSION="1.22" # K8s is changed regularly. I just want to keep this script stable with v1.22
+
+# update system
+# yum clean all
+# yum -y update
+# sleep 1
 
 # config timezone
 timedatectl set-timezone Asia/Ho_Chi_Minh
@@ -21,27 +26,18 @@ sed -i 's/enforcing/disabled/g' /etc/selinux/config
 systemctl stop firewalld
 systemctl disable firewalld
 
-# config hostname
-# hostnamectl set-hostname node2
+##########################################################################################
+# SECTION 2: INSTALL
 
-# config file host
-cat >> "/etc/hosts" <<END
-172.16.10.100 node1
-172.16.10.101 node2
-172.16.10.102 node3
-172.16.10.102 nfs 
-END
-
-# config network, config in vagrantfile in dev
-
+# check requirements
+echo "--> STEP 01. check requirements"
 # Tắt swap: Nên tắt swap để kubelet hoạt động ổn định.
 sed -i '/swap/d' /etc/fstab
 swapoff -a
 
-##########################################################################################
-# SECTION 2: INSTALL 
-
 # install docker
+echo "--> STEP 02. install Docker"
+if [ ! -d /etc/systemd/system/docker.service.d ]; then
 
 yum install -y yum-utils device-mapper-persistent-data lvm2
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
@@ -65,8 +61,11 @@ mkdir -p /etc/systemd/system/docker.service.d
 systemctl daemon-reload
 systemctl restart docker
 systemctl enable docker
+fi
 
-# Cài đặt kubelet, kubeadm và kubectl
+# Install kubelet, kubeadm
+echo "--> STEP 03. install Kubernetes components"
+if [ ! -f /etc/yum.repos.d/kubernetes.repo ]; then
 cat <<EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
@@ -78,22 +77,19 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cl
 exclude=kube*
 EOF
 
-yum install -y kubelet kubeadm --disableexcludes=kubernetes
-
+yum install -y kubeadm=$K8S_VERSION kubelet=$K8S_VERSION
 systemctl enable kubelet
 systemctl start kubelet
 
-cat <<EOF >  /etc/sysctl.d/k8s.conf
+# sysctl
+cat >>/etc/sysctl.d/k8s.conf<<EOF
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
 sysctl --system >/dev/null 2>&1
+fi
 
 #########################################################################################
 # SECTION 3: CONFIG
 # join cluster
-
-# curl -sO http://node1/join-cluster.sh
-# sudo chmod 755 join-cluster.sh
-# sudo bash join-cluster.sh
 curl -s http://node1/join-cluster.sh | bash

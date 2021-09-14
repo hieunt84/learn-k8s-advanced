@@ -1,14 +1,21 @@
 #!/bin/bash
-set -e
 
 ##########################################################################################
 # SECTION 1: PREPARE
 
+# change root
+sudo -i
+sleep 1
+
+# TODO Make [pod network CIDR, K8s version, docker version, etc.] configurable
+K8S_VERSION="1.22" # K8s is changed regularly. I just want to keep this script stable with v1.22
+POD_IP_RANGE="192.168.0.0/16"  # This IP Range is the default value of Calico
+API_SERVER="172.20.10.101"
+
 # update system
-sleep 1
-yum -y clean all
-yum -y update
-sleep 1
+# yum clean all
+# yum -y update
+# sleep 1
 
 # config timezone
 timedatectl set-timezone Asia/Ho_Chi_Minh
@@ -21,28 +28,17 @@ sed -i 's/enforcing/disabled/g' /etc/selinux/config
 systemctl stop firewalld
 systemctl disable firewalld
 
-# config hostname
-hostnamectl set-hostname master-product-01
+##########################################################################################
+# SECTION 2: INSTALL
 
-# config file host
-cat >> "/etc/hosts" <<END
-192.168.1.242 master-product-01
-192.168.1.243 worker-product-01
-192.168.1.244 worker-product-02
-192.168.1.245 nfs-product-01 
-END
-
-# config network, config in vagrantfile in dev
-
+# check requirements
+echo "--> STEP 01. check requirements"
 # Tắt swap: Nên tắt swap để kubelet hoạt động ổn định.
 sed -i '/swap/d' /etc/fstab
 swapoff -a
 
-##########################################################################################
-# SECTION 2: INSTALL 
-
 # install docker
-
+echo "--> STEP 02. install Docker"
 if [ ! -d /etc/systemd/system/docker.service.d ]; then
 
 yum install -y yum-utils device-mapper-persistent-data lvm2
@@ -70,7 +66,7 @@ systemctl enable docker
 fi
 
 # Install kubelet, kubeadm và kubectl
-
+echo "--> STEP 03. install Kubernetes components"
 if [ ! -f /etc/yum.repos.d/kubernetes.repo ]; then
 cat <<EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
@@ -83,7 +79,8 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cl
 exclude=kube*
 EOF
 
-yum install -y -q kubelet kubeadm kubectl --disableexcludes=kubernetes
+# yum install -y -q kubelet kubeadm kubectl --disableexcludes=kubernetes
+yum install -y kubeadm=$K8S_VERSION kubelet=$K8S_VERSION kubectl=$K8S_VERSION
 systemctl enable kubelet
 systemctl start kubelet
 
@@ -95,7 +92,6 @@ EOF
 sysctl --system >/dev/null 2>&1
 
 fi
-#End Install kubelet
 
 # Install apache
 yum install httpd -y
@@ -113,14 +109,14 @@ unmanaged-devices=interface-name:cali*;interface-name:tunl*
 EOF
 fi
 
-# Setup Kubernetes Cluster
-kubeadm init --pod-network-cidr=192.168.100.0/24 --apiserver-advertise-address=192.168.1.242
+# Init the cluster
+kubeadm init --pod-network-cidr=$POD_IP_RANGE --apiserver-advertise-address=$API_SERVER
 
 # Setup kubectl for user root on Master Node
 export KUBECONFIG=/etc/kubernetes/admin.conf
 echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> ~/.bash_profile
 
-# Install Calico
+# Install Calico network. Ref. https://docs.projectcalico.org/v3.17/getting-started/kubernetes/installation/calico
 kubectl apply -f https://docs.projectcalico.org/v3.17/manifests/calico.yaml
 
 # Đến đây Master Node của Kubernetes Cluster đã sẵn sàng,
