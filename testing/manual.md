@@ -1,23 +1,26 @@
+### Env
+    - localhost/on-primes/cloud
+    - production/staging/testing
+
+### Architecture
+    - 4 node :  1 master, 2 worker , 1 nfs server
+
 ### Steps Deploy
-1. Step: setup k8s
-- master: run script setup-master.sh
-- worker: run script setup-worker.sh
+1. Step 01: deploy cluster k8s
+- cd testing/cluster
+- vagrant up
 
-2. Setup nfs server
-- run setup-nfs.sh
+2. Step 02: deploy nfs provisioner on k8s
+- on master
+- run 03-install-nfs-external-provisioner.sh
 
-3. Deploy nfs provisioner on k8s
+3. Step 03: Testing
 ```console
-   helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
-
-   helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
-     --set nfs.server=172.16.10.106 \
-     --set nfs.path=/nfs-vol
+cd nfs-storageclass
+kubectl apply -f test-pvc.yaml
 ```
-4. Test
-```console
-   kubectl apply -f test-claim.yaml
-```
+### Operation
+    - kubectl 
 
 ### Ref
     Viettel VKE

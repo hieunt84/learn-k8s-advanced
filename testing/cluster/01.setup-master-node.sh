@@ -7,11 +7,6 @@
 sudo -i
 sleep 1
 
-# TODO Make [pod network CIDR, K8s version, docker version, etc.] configurable
-K8S_VERSION="1.22" # K8s is changed regularly. I just want to keep this script stable with v1.22
-POD_IP_RANGE="192.168.0.0/16"  # This IP Range is the default value of Calico
-API_SERVER="172.20.10.101"
-
 # update system
 # yum clean all
 # yum -y update
@@ -30,6 +25,12 @@ systemctl disable firewalld
 
 ##########################################################################################
 # SECTION 2: INSTALL
+
+# TODO Make [pod network CIDR, K8s version, docker version, etc.] configurable
+K8S_VERSION="1.22.1" # K8s is changed regularly. I just want to keep this script stable with v1.22
+CALICIO_VERISON="3.20"
+POD_IP_RANGE="192.168.0.0/16"  # This IP Range is the default value of Calico
+API_SERVER="172.20.10.101"
 
 # check requirements
 echo "--> STEP 01. check requirements"
@@ -80,7 +81,8 @@ exclude=kube*
 EOF
 
 # yum install -y -q kubelet kubeadm kubectl --disableexcludes=kubernetes
-yum install -y kubeadm=$K8S_VERSION kubelet=$K8S_VERSION kubectl=$K8S_VERSION
+yum install -y kubeadm-$K8S_VERSION kubelet-$K8S_VERSION kubectl-$K8S_VERSION --disableexcludes=kubernetes
+
 systemctl enable kubelet
 systemctl start kubelet
 
@@ -110,14 +112,14 @@ EOF
 fi
 
 # Init the cluster
-kubeadm init --pod-network-cidr=$POD_IP_RANGE --apiserver-advertise-address=$API_SERVER
+kubeadm init --pod-network-cidr=$POD_IP_RANGE --apiserver-advertise-address=$API_SERVER | tee kubeadm-init.out
 
 # Setup kubectl for user root on Master Node
 export KUBECONFIG=/etc/kubernetes/admin.conf
 echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> ~/.bash_profile
 
 # Install Calico network. Ref. https://docs.projectcalico.org/v3.17/getting-started/kubernetes/installation/calico
-kubectl apply -f https://docs.projectcalico.org/v3.17/manifests/calico.yaml
+kubectl apply -f https://docs.projectcalico.org/v$CALICIO_VERISON/manifests/calico.yaml
 
 # Đến đây Master Node của Kubernetes Cluster đã sẵn sàng,
 # cho Worker Node tham gia (join) vào

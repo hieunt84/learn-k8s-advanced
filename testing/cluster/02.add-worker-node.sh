@@ -7,9 +7,6 @@
 sudo -i
 sleep 1
 
-# TODO Make [pod network CIDR, K8s version, docker version, etc.] configurable
-K8S_VERSION="1.22" # K8s is changed regularly. I just want to keep this script stable with v1.22
-
 # update system
 # yum clean all
 # yum -y update
@@ -28,6 +25,9 @@ systemctl disable firewalld
 
 ##########################################################################################
 # SECTION 2: INSTALL
+# TODO Make [pod network CIDR, K8s version, docker version, etc.] configurable
+K8S_VERSION="1.22.1" # K8s is changed regularly. I just want to keep this script stable with v1.22
+MASTER_IP="172.20.10.101"
 
 # check requirements
 echo "--> STEP 01. check requirements"
@@ -77,7 +77,7 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cl
 exclude=kube*
 EOF
 
-yum install -y kubeadm=$K8S_VERSION kubelet=$K8S_VERSION
+yum install -y kubeadm-$K8S_VERSION kubelet-$K8S_VERSION kubectl-$K8S_VERSION --disableexcludes=kubernetes
 systemctl enable kubelet
 systemctl start kubelet
 
@@ -92,4 +92,4 @@ fi
 #########################################################################################
 # SECTION 3: CONFIG
 # join cluster
-curl -s http://node1/join-cluster.sh | bash
+curl -s http://$MASTER_IP/join-cluster.sh | bash
