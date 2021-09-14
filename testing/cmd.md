@@ -1,5 +1,7 @@
-### Command kubectl
+### Commands kubectl (k)
 ```console
+k get node -o wide
+k cluster-info
 kubectl get pods -w
 kubectl get pv,pvc
 
