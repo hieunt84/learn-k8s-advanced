@@ -9,5 +9,5 @@ helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/
 helm repo update
 
 helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
-  --set nfs.server=172.20.10.100\
+  --set nfs.server=172.20.10.101\
   --set nfs.path=/nfs-vol

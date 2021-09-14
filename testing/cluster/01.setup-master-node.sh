@@ -28,7 +28,7 @@ systemctl disable firewalld
 
 # TODO Make [pod network CIDR, K8s version, docker version, etc.] configurable
 K8S_VERSION="1.22.1" # K8s is changed regularly. I just want to keep this script stable with v1.22
-CALICIO_VERISON="3.20"
+CALICIO_VERISON="3.17"
 POD_IP_RANGE="192.168.0.0/16"  # This IP Range is the default value of Calico
 API_SERVER="172.20.10.101"
 
@@ -79,6 +79,7 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 exclude=kube*
 EOF
+yum update -y
 
 # yum install -y -q kubelet kubeadm kubectl --disableexcludes=kubernetes
 yum install -y kubeadm-$K8S_VERSION kubelet-$K8S_VERSION kubectl-$K8S_VERSION --disableexcludes=kubernetes

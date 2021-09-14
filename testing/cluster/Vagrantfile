@@ -1,43 +1,18 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-Vagrant.configure("2") do |config|
-
-  # make vm nfs server
-  config.vm.define "nfs" do |node|
-    node.vm.box = "generic/centos7"
-    node.vm.box_check_update = false
-    node.vm.hostname = "nfs"
-    node.vm.network "public_network", ip: "172.20.10.100"
-    node.vm.provision "shell", path: "00.setup-nfs-server.sh"   
-  end
+Vagrant.configure("2") do |config|  
 
   # make vm node1 - master
   config.vm.define "node1" do |node|
     node.vm.box = "generic/centos7"
+    node.vm.provider "virtualbox" do |vb|
+      vb.cpus = 4  
+      vb.memory = "8129"      
+    end       
     node.vm.box_check_update = false
     node.vm.hostname = "master-test-01"
     node.vm.network "public_network", ip: "172.20.10.101"
     node.vm.provision "shell", path: "01.setup-master-node.sh"   
   end
-
-  # make vm node2 - worker
-  config.vm.define "node2" do |node|
-    node.vm.box = "generic/centos7"
-    node.vm.box_check_update = false
-    # node.vbguest.auto_update = false
-    node.vm.hostname = "worker-test-01"
-    node.vm.network "public_network", ip: "172.20.10.102"
-    node.vm.provision "shell", path: "02.add-worker-node.sh"
-  end
-
-  # make vm node3 - worker
-  config.vm.define "node3" do |node|
-    node.vm.box = "generic/centos7"
-    node.vm.box_check_update = false
-    node.vm.hostname = "worker-test-02"
-    node.vm.network "public_network", ip: "172.20.10.103"
-    node.vm.provision "shell", path: "02.add-worker-node.sh"
-  end
-
 end
