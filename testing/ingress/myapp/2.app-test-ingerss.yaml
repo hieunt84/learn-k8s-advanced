@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-test
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  # backend:
+  #   serviceName: nginx-ingress-default-backend
+  #   servicePort: 80
+  rules:
+    # Tên miền truy cập
+  - host: test2.web.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            # dịch vụ phục vụ tương ứng với tên miền và path
+            name: http-test-svc
+            port: 
+              number: 80
