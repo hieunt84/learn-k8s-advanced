@@ -13,7 +13,6 @@ Manual Deploy
   -https://cuongquach.com/cai-dat-kubernetes-cluster-voi-kubeadm.html
   -https://github.com/nhtua/bookshell
 
-
 Viettel VKE
   -https://viettelidc.com.vn/viettel-kubernetes-service
   -https://drive.google.com/file/d/1EcuTIUB37mEq4oVcKfQmQYaYHYNE-54i/view?usp=sharing
