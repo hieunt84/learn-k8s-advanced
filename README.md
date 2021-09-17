@@ -1,12 +1,16 @@
 # Play-k8s
+### Note in envirionment test allow deploy pod on master
+```
+xóa taint trên node master.xtl cho phép tạo Pod
+kubectl taint node master.xtl node-role.kubernetes.io/master-
+```
+
 ### Goal
 - Deployment k8s cluster
 - solution k8s as service
 
-
 ### Ref
-```console
-
+```
 Manual Deploy 
   -https://blogd.net/kubernetes/cai-dat-kubernetes-cluster/
   -https://xuanthulab.net/gioi-thieu-va-cai-dat-kubernetes-cluster.html
